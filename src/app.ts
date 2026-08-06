@@ -7,6 +7,11 @@ import apiRoutes from "./api.js";
 export function createApp() {
   const app = express();
   const PORT = env.PORT;
+  // When running behind a proxy (e.g., Vercel), trust the proxy
+  // so secure cookies and protocol detection work correctly in production.
+  if (env.NODE_ENV === "production" || process.env.VERCEL === "1") {
+    app.set("trust proxy", true);
+  }
   app.use(
     cors({
       origin: true,

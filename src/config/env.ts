@@ -10,7 +10,12 @@ export const env = {
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || "",
   APP_URL: process.env.APP_URL || "http://localhost:5173",
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "",
-  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  // For production (Vercel or NODE_ENV=production), always use the official
+  // public mount URL for Better Auth so callback URLs are correct.
+  BETTER_AUTH_URL:
+    (process.env.VERCEL === "1" || process.env.NODE_ENV === "production")
+      ? "https://skillswap-server-monirujjaman.vercel.app/api/auth"
+      : process.env.BETTER_AUTH_URL || "http://localhost:3000",
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
 };
