@@ -12,9 +12,15 @@ export function createApp() {
   if (env.NODE_ENV === "production" || process.env.VERCEL === "1") {
     app.set("trust proxy", true);
   }
+
+  const corsOrigins = [env.CLIENT_URL];
+  if (env.NODE_ENV !== "production") {
+    corsOrigins.push("http://localhost:5173");
+  }
+
   app.use(
     cors({
-      origin: true,
+      origin: corsOrigins,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
       credentials: true,

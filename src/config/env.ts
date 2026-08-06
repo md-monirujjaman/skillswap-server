@@ -9,6 +9,9 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || "",
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || "",
   APP_URL: process.env.APP_URL || "http://localhost:5173",
+  CLIENT_URL: process.env.CLIENT_URL || "https://skillswap-client-monirujjaman.vercel.app",
+  CLIENT_DASHBOARD_URL:
+    process.env.CLIENT_DASHBOARD_URL || `${process.env.CLIENT_URL || "https://skillswap-client-monirujjaman.vercel.app"}/dashboard`,
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "",
   // For production, use the public backend auth mount. In non-production,
   // fall back to any explicitly configured env value or localhost.

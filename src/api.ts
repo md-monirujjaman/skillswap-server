@@ -1,8 +1,9 @@
 import express from "express";
-import type { Request, Response } from "express-serve-static-core";
+import type { Request, Response, NextFunction } from "express-serve-static-core";
 import authRouter from "./auth.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth as betterAuth } from "./betterAuth.js";
+import env from "./config/env.js";
 import tasksRouter from "./api/tasks.js";
 import proposalsRouter from "./api/proposals.js";
 import usersRouter from "./api/users.js";
@@ -13,8 +14,17 @@ import dashboardRouter from "./api/dashboard.js";
 
 const router = express.Router();
 
+const defaultOAuthCallbackURL = env.CLIENT_DASHBOARD_URL;
+function setDefaultOAuthCallbackURL(req: Request, _res: Response, next: NextFunction) {
+  if (req.method === "POST" && req.path === "/sign-in/social" && !req.body?.callbackURL) {
+    req.body = { ...req.body, callbackURL: defaultOAuthCallbackURL };
+  }
+  next();
+}
+
 // Preserve existing custom auth routes (email/password)
 router.use("/auth", authRouter);
+router.use("/auth", setDefaultOAuthCallbackURL);
 
 // Mount Better Auth's Node handler under the same path so it provides
 // social OAuth endpoints (redirect + callback) and session management.

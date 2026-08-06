@@ -16,6 +16,10 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins,
   advanced: {
+    useSecureCookies: env.NODE_ENV === "production" || process.env.VERCEL === "1",
+    defaultCookieAttributes: {
+      sameSite: "none"
+    },
     cookies: {
       oauth_state: {
         attributes: {

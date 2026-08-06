@@ -6,6 +6,14 @@ import env from "./config/env.js";
 
 const authRouter = express.Router();
 const JWT_SECRET = env.JWT_SECRET;
+const isSecureCookie = env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+const authCookieSettings = {
+  httpOnly: true,
+  secure: isSecureCookie,
+  sameSite: isSecureCookie ? 'none' as const : 'lax' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+};
+
 if (!JWT_SECRET) {
   console.warn("Warning: JWT_SECRET environment variable is missing.");
 }
@@ -57,12 +65,7 @@ authRouter.post("/register", async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET as string, { expiresIn: '7d' });
 
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    res.cookie('auth_token', token, authCookieSettings);
 
     res.status(201).json({ message: "Registered successfully", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
@@ -101,12 +104,7 @@ authRouter.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET as string, { expiresIn: '7d' });
 
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    res.cookie('auth_token', token, authCookieSettings);
 
     res.status(200).json({ message: "Logged in successfully", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
@@ -117,7 +115,10 @@ authRouter.post("/login", async (req, res) => {
 
 // Logout
 authRouter.post("/logout", (req, res) => {
-  res.clearCookie("auth_token");
+  res.clearCookie("auth_token", {
+    secure: isSecureCookie,
+    sameSite: 'none'
+  });
   res.status(200).json({ message: "Logged out successfully" });
 });
 
