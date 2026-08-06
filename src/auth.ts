@@ -154,4 +154,15 @@ authRouter.get("/me", async (req, res) => {
 // Note: mock Google OAuth handler removed. Real OAuth routes are provided
 // by Better Auth and will be mounted under /api/auth via toNodeHandler(auth).
 
+// Compatibility: Better Auth expects a POST to `/sign-in/social` to initiate
+// social sign-in. Some clients may issue a GET (browser link). Provide a
+// lightweight GET handler that explains the correct method to avoid a
+// confusing 404 and guide callers to use POST.
+authRouter.get('/sign-in/social', (req, res) => {
+  res.status(405).json({
+    error: 'Method Not Allowed. Use POST /api/auth/sign-in/social?provider=google',
+    hint: 'Better Auth exposes POST /sign-in/social for initiating social OAuth flows.'
+  });
+});
+
 export default authRouter;
