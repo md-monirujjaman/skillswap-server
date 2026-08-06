@@ -1,6 +1,8 @@
 import express from "express";
 import type { Request, Response } from "express-serve-static-core";
 import authRouter from "./auth.js";
+import { toNodeHandler } from "better-auth/node";
+import { auth as betterAuth } from "./betterAuth.js";
 import tasksRouter from "./api/tasks.js";
 import proposalsRouter from "./api/proposals.js";
 import usersRouter from "./api/users.js";
@@ -11,7 +13,13 @@ import dashboardRouter from "./api/dashboard.js";
 
 const router = express.Router();
 
+// Preserve existing custom auth routes (email/password)
 router.use("/auth", authRouter);
+
+// Mount Better Auth's Node handler under the same path so it provides
+// social OAuth endpoints (redirect + callback) and session management.
+// This does not overwrite existing `/auth/login`, `/auth/register`, `/auth/logout`, or `/auth/me`.
+router.use("/auth", toNodeHandler(betterAuth));
 router.use("/tasks", tasksRouter);
 router.use("/proposals", proposalsRouter);
 router.use("/users", usersRouter);

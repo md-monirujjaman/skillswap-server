@@ -151,33 +151,7 @@ authRouter.get("/me", async (req, res) => {
 });
 
 // MOCK Google OAuth Login
-authRouter.post('/google', async (req, res) => {
-  try {
-    let user = await User.findOne({ email: "oauth-user@gmail.com" });
-    if (!user) {
-      user = await User.create({
-        name: "Google User",
-        email: "oauth-user@gmail.com",
-        password: "", // No password for OAuth
-        role: "Client", 
-        image: "https://api.dicebear.com/7.x/initials/svg?seed=Google"
-      });
-    }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET as string, { expiresIn: '7d' });
-
-    res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-    res.status(200).json({ message: "Mock Google login successful", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
-  } catch (error) {
-    console.error("Google Login Error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// Note: mock Google OAuth handler removed. Real OAuth routes are provided
+// by Better Auth and will be mounted under /api/auth via toNodeHandler(auth).
 
 export default authRouter;
