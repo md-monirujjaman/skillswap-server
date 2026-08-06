@@ -7,22 +7,13 @@ import apiRoutes from "./api.js";
 export function createApp() {
   const app = express();
   const PORT = env.PORT;
-  const allowedOrigins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    env.APP_URL,
-  ].filter(Boolean) as string[];
-
   app.use(
     cors({
-      origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin) || env.NODE_ENV !== "production") {
-          return callback(null, true);
-        }
-        return callback(new Error("CORS policy violation"), false);
-      },
+      origin: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
       credentials: true,
+      optionsSuccessStatus: 204,
     })
   );
 
