@@ -1,21 +1,10 @@
-import mongoose from "mongoose";
 import env from "./src/config/env.js";
 import { createApp } from "./src/app.js";
+import { connectDatabase } from "./src/db.js";
 import { User } from "./src/models.js";
 import bcrypt from "bcryptjs";
 
-mongoose.set("bufferCommands", false);
-
-async function connectDatabase() {
-  if (!env.MONGODB_URI) {
-    throw new Error("MONGODB_URI is not set. Please configure it in your environment.");
-  }
-
-  await mongoose.connect(env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000,
-  });
-  console.log("Connected to MongoDB successfully");
-}
+await connectDatabase();
 
 async function seedUsers() {
   const adminExists = await User.findOne({ email: "admin@skillwrap.com" });
@@ -44,12 +33,12 @@ async function seedUsers() {
   }
 }
 
+const app = createApp();
+
 async function startServer() {
-  const app = createApp();
   const port = Number(app.locals.port || Number(env.PORT) || 3000);
 
   try {
-    await connectDatabase();
     await seedUsers();
 
     app.listen(port, "0.0.0.0", () => {
@@ -61,10 +50,8 @@ async function startServer() {
   }
 }
 
-const app = createApp();
-
 if (process.env.VERCEL !== "1") {
-  void startServer();
+  await startServer();
 }
 
 export default app;
