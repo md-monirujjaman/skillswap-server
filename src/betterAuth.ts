@@ -13,7 +13,9 @@ const backendOrigin = (() => {
 // As we use MongoDB/Mongoose natively elsewhere, this betterAuth instance
 // is minimally configured to satisfy section 06 environment rules.
 const trustedOrigins = [
-  env.CLIENT_URL,
+  env.FRONTEND_URL,
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
   backendOrigin,
   ...((env.BETTER_AUTH_TRUSTED_ORIGINS || "")
     .split(",")
@@ -23,7 +25,8 @@ const trustedOrigins = [
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
+  baseURL: backendOrigin,
+  basePath: "/api/auth",
   trustedOrigins,
   advanced: {
     useSecureCookies: isSecureCookie,

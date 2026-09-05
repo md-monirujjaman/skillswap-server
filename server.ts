@@ -4,8 +4,6 @@ import { connectDatabase } from "./src/db.js";
 import { User } from "./src/models.js";
 import bcrypt from "bcryptjs";
 
-await connectDatabase();
-
 async function seedUsers() {
   const adminExists = await User.findOne({ email: "admin@skillwrap.com" });
   if (!adminExists) {

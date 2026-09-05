@@ -14,7 +14,7 @@ import dashboardRouter from "./api/dashboard.js";
 
 const router = express.Router();
 
-const defaultOAuthCallbackURL = env.CLIENT_DASHBOARD_URL;
+const defaultOAuthCallbackURL = `${env.FRONTEND_URL}/auth/callback`;
 function setDefaultOAuthCallbackURL(req: Request, _res: Response, next: NextFunction) {
   if (req.method === "POST" && req.path === "/sign-in/social" && !req.body?.callbackURL) {
     req.body = { ...req.body, callbackURL: defaultOAuthCallbackURL };

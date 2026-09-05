@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import env from "./config/env.js";
 import apiRoutes from "./api.js";
+import { connectDatabase } from "./db.js";
 
 export function createApp() {
   const app = express();
@@ -13,10 +14,13 @@ export function createApp() {
     app.set("trust proxy", true);
   }
 
-  const corsOrigins = [env.CLIENT_URL];
-  if (env.NODE_ENV !== "production") {
-    corsOrigins.push("http://localhost:5173");
-  }
+  const corsOrigins = [
+    env.FRONTEND_URL,
+    env.APP_URL,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+  ].filter((origin, index, origins) => origins.indexOf(origin) === index);
 
   app.use(
     cors({
@@ -37,6 +41,19 @@ export function createApp() {
 
   app.get("/health", (_req: Request, res: Response) => {
     res.json({ status: "OK" });
+  });
+
+  app.use("/api", async (req: Request, _res: Response, next: NextFunction) => {
+    if (req.method === "OPTIONS" || req.path.startsWith("/auth")) {
+      next();
+      return;
+    }
+    try {
+      await connectDatabase();
+      next();
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.use("/api", apiRoutes);
