@@ -11,6 +11,7 @@ const authCookieSettings = {
   httpOnly: true,
   secure: isSecureCookie,
   sameSite: isSecureCookie ? 'none' as const : 'lax' as const,
+  path: '/',
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
@@ -117,7 +118,8 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", (req, res) => {
   res.clearCookie("auth_token", {
     secure: isSecureCookie,
-    sameSite: 'none'
+    sameSite: isSecureCookie ? 'none' : 'lax',
+    path: '/'
   });
   res.status(200).json({ message: "Logged out successfully" });
 });

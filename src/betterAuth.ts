@@ -16,31 +16,31 @@ const trustedOrigins = [
   env.FRONTEND_URL,
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  backendOrigin,
-  ...((env.BETTER_AUTH_TRUSTED_ORIGINS || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean)),
-].filter(Boolean);
+];
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: backendOrigin,
   basePath: "/api/auth",
   trustedOrigins,
+  onAPIError: {
+    errorURL: `${env.FRONTEND_URL}/login?error=oauth_failed`,
+  },
   advanced: {
     useSecureCookies: isSecureCookie,
     defaultCookieAttributes: {
+      httpOnly: true,
       secure: isSecureCookie,
       sameSite: isSecureCookie ? "none" : "lax",
-      path: "/"
+      path: "/",
     },
     cookies: {
       oauth_state: {
         attributes: {
+          httpOnly: true,
           secure: isSecureCookie,
           sameSite: isSecureCookie ? "none" : "lax",
-          path: "/"
+          path: "/",
         }
       }
     }

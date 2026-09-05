@@ -2,6 +2,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const configuredBetterAuthURL =
+  process.env.BETTER_AUTH_URL ||
+  ((process.env.VERCEL === "1" || process.env.NODE_ENV === "production")
+    ? "https://skillswap-server-monirujjaman.vercel.app"
+    : "http://localhost:3000");
+
+const betterAuthURL = (() => {
+  try {
+    return new URL(configuredBetterAuthURL).origin;
+  } catch {
+    return configuredBetterAuthURL;
+  }
+})();
+
 export const env = {
   PORT: process.env.PORT || "3000",
   NODE_ENV: process.env.NODE_ENV || "development",
@@ -14,10 +28,7 @@ export const env = {
   CLIENT_URL:
     process.env.CLIENT_URL || process.env.FRONTEND_URL || process.env.APP_URL || "http://localhost:3000",
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "",
-  BETTER_AUTH_URL:
-    (process.env.VERCEL === "1" || process.env.NODE_ENV === "production")
-      ? process.env.BETTER_AUTH_URL || "https://skillswap-server-monirujjaman.vercel.app"
-      : process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  BETTER_AUTH_URL: betterAuthURL,
   BETTER_AUTH_TRUSTED_ORIGINS: process.env.BETTER_AUTH_TRUSTED_ORIGINS || "",
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",

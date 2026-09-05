@@ -26,6 +26,41 @@ function setDefaultOAuthCallbackURL(req: Request, _res: Response, next: NextFunc
 router.use("/auth", authRouter);
 router.use("/auth", setDefaultOAuthCallbackURL);
 
+// Start Google OAuth from a browser navigation so Better Auth can set its
+// state cookie on the backend origin before redirecting to Google.
+router.get("/auth/google", async (req: Request, res: Response) => {
+  try {
+    const response = await betterAuth.api.signInSocial({
+      body: {
+        provider: "google",
+        callbackURL: defaultOAuthCallbackURL,
+      },
+      headers: req.headers,
+      asResponse: true,
+    });
+
+    response.headers.forEach((value, key) => {
+      res.append(key, value);
+    });
+
+    const authorizationURL = response.headers.get("location");
+    if (authorizationURL) {
+      res.redirect(302, authorizationURL);
+      return;
+    }
+
+    res.status(response.status).send(await response.text());
+  } catch (error) {
+    console.error("OAuth start failed", {
+      path: req.path,
+      method: req.method,
+      status: 500,
+      error: error instanceof Error ? error.name : "UnknownError",
+    });
+    res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
+  }
+});
+
 // Mount Better Auth's Node handler under the same path so it provides
 // social OAuth endpoints (redirect + callback) and session management.
 // This does not overwrite existing `/auth/login`, `/auth/register`, `/auth/logout`, or `/auth/me`.

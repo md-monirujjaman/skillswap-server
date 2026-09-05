@@ -16,10 +16,8 @@ export function createApp() {
 
   const corsOrigins = [
     env.FRONTEND_URL,
-    env.APP_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:5173",
   ].filter((origin, index, origins) => origins.indexOf(origin) === index);
 
   app.use(
@@ -31,6 +29,8 @@ export function createApp() {
       optionsSuccessStatus: 204,
     })
   );
+
+  app.options("*", cors());
 
   app.use(express.json());
   app.use(cookieParser());
