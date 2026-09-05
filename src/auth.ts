@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User } from "./models.js";
 import env from "./config/env.js";
+import { auth as betterAuth } from "./betterAuth.js";
 
 const authRouter = express.Router();
 const JWT_SECRET = env.JWT_SECRET;
@@ -127,6 +128,26 @@ authRouter.post("/logout", (req, res) => {
 // Get Current Auth State
 authRouter.get("/me", async (req, res) => {
   try {
+    const session = await betterAuth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (session?.user) {
+      const appUser = await User.findOne({ email: session.user.email }).select("-password");
+
+      if (appUser) {
+        const token = jwt.sign({ id: appUser._id, role: appUser.role }, JWT_SECRET as string, {
+          expiresIn: "7d",
+        });
+        res.cookie("auth_token", token, authCookieSettings);
+        res.status(200).json({ user: appUser });
+        return;
+      }
+
+      res.status(200).json({ user: session.user });
+      return;
+    }
+
     const token = req.cookies.auth_token;
     if (!token) {
       res.status(401).json({ error: "Not authenticated" });

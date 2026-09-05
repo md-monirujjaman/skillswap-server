@@ -20,17 +20,22 @@ export function createApp() {
     "http://127.0.0.1:3000",
   ].filter((origin, index, origins) => origins.indexOf(origin) === index);
 
-  app.use(
-    cors({
-      origin: corsOrigins,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-      credentials: true,
-      optionsSuccessStatus: 204,
-    })
-  );
+  const corsOptions = {
+    origin: corsOrigins,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    credentials: true,
+    optionsSuccessStatus: 204,
+  };
 
-  app.options("*", cors());
+  app.use(cors(corsOptions));
+
+  app.options("*", cors(corsOptions));
+
+  app.use("/api/auth", (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    next();
+  });
 
   app.use(express.json());
   app.use(cookieParser());
@@ -44,7 +49,7 @@ export function createApp() {
   });
 
   app.use("/api", async (req: Request, _res: Response, next: NextFunction) => {
-    if (req.method === "OPTIONS" || req.path.startsWith("/auth")) {
+    if (req.method === "OPTIONS") {
       next();
       return;
     }
