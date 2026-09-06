@@ -133,7 +133,19 @@ authRouter.get("/me", async (req, res) => {
     });
 
     if (session?.user) {
-      const appUser = await User.findOne({ email: session.user.email }).select("-password");
+      const appUser = await User.findOneAndUpdate(
+        { email: session.user.email },
+        {
+          $setOnInsert: {
+            name: session.user.name || session.user.email.split("@")[0],
+            email: session.user.email,
+            image: session.user.image || "",
+            password: "",
+            role: "Client",
+          },
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      ).select("-password");
 
       if (appUser) {
         const token = jwt.sign({ id: appUser._id, role: appUser.role }, JWT_SECRET as string, {

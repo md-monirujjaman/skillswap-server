@@ -30,6 +30,10 @@ router.use("/auth", setDefaultOAuthCallbackURL);
 // state cookie on the backend origin before redirecting to Google.
 router.get("/auth/google", async (req: Request, res: Response) => {
   try {
+    console.info("OAuth start", {
+      origin: req.headers.origin || null,
+      hasCookie: Boolean(req.headers.cookie),
+    });
     const response = await betterAuth.api.signInSocial({
       body: {
         provider: "google",
@@ -59,6 +63,15 @@ router.get("/auth/google", async (req: Request, res: Response) => {
     });
     res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
   }
+});
+
+router.use("/auth/callback/google", (req: Request, _res: Response, next: NextFunction) => {
+  console.info("OAuth callback", {
+    hasCode: Boolean(req.query.code),
+    hasState: Boolean(req.query.state),
+    hasStateCookie: Boolean(req.headers.cookie?.includes("better-auth.state")),
+  });
+  next();
 });
 
 // Mount Better Auth's Node handler under the same path so it provides
